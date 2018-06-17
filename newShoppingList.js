@@ -21,17 +21,32 @@ function generateItemElement(item, itemIndex) {
     </div>
   </li>`; //print out the li element as a string
 }
-function generateShoppingItemsString() {
+function generateShoppingItemsString(filter) {
+	let selectedItems = STORE;
+	// if filter === 'checked' filter out unchecked items
+	if (filter === "checked") {
+		selectedItems = STORE.filter(item => {
+			//filter the store so that only items that are checked are in "checked items"
+			return item.selected === true;
+		});
+	} else if (filter) {
+		selectedItems = STORE.filter(item => {
+			//filter only items that include the search term
+			if (item.name.toLowerCase().includes(filter)) {
+				return item;
+			}
+		});
+	}
+
 	//loop through the STORE and for every item in the store, generate an li element using generateItemElemens
-	console.log("STORE", STORE);
-	const items = STORE.map((
+	const items = selectedItems.map((
 		item,
 		index //since the product will be an array, need to join to one big string to put in the DOM
 	) => generateItemElement(item, index));
 	return items.join("");
 }
-function renderShoppingList() {
-	const shoppingListItemsString = generateShoppingItemsString(); //assign the string created with generateShoppingItemsString to a variable
+function renderShoppingList(filter) {
+	const shoppingListItemsString = generateShoppingItemsString(filter); //assign the string created with generateShoppingItemsString to a variable
 	$(".shopping-list").html(shoppingListItemsString); //add the string to the ul element with the shopping-list class
 }
 function addItem(itemName) {
@@ -96,11 +111,7 @@ function filterList() {
 	$("#js-shopping-list-filter").submit(function(event) {
 		//when "new list" button is clicked
 		event.preventDefault(); //prevent default behavior
-		const checkedItems = STORE.filter(item => {
-			//filter the store so that only items that are checked are in "checked items"
-			return item.selected === true;
-		});
-		renderShoppingList(checkedItems); //render the shopping list with checked items
+		renderShoppingList("checked"); //render the shopping list with checked items
 	});
 }
 function handleSearches() {
@@ -110,13 +121,7 @@ function handleSearches() {
 		const searchTerm = $("#mySearch")
 			.val()
 			.toLowerCase(); //get value of what the user inputs
-		const searchMatches = STORE.filter(item => {
-			//filter only items that include the search term
-			if (item.name.toLowerCase().includes(searchTerm)) {
-				return item;
-			}
-			renderShoppingList(searchMatches); //render only search matches
-		});
+		renderShoppingList(searchTerm); //render only search matches
 	});
 }
 // User can edit the title of an item
